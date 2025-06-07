@@ -4,13 +4,19 @@ import { Controller, useForm } from "react-hook-form";
 import FormGenerator, {
   DataFormType,
 } from "../../../shared/components/FormGenerator";
-import { Button } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
+import { useAuthStore } from "../stores/auth.stores";
+import { RegisterType } from "../type";
+import { useRouter } from "next/navigation";
 
 const RegisterForm = () => {
+  const router = useRouter();
   const form = useForm();
+  const { loading, postRegister } = useAuthStore();
+
   const dataForm: DataFormType[] = [
     {
-      name: "username",
+      name: "name",
       type: "text",
       //   isRequired: true,
       label: "Username",
@@ -18,7 +24,7 @@ const RegisterForm = () => {
       validation: {
         required: {
           value: true,
-          message: "This is field is required!",
+          message: "postSpaceOfficerThis is field is required",
         },
       },
     },
@@ -31,7 +37,11 @@ const RegisterForm = () => {
       validation: {
         required: {
           value: true,
-          message: "This is field is required!",
+          message: "postSpaceOfficerThis is field is required",
+        },
+        pattern: {
+          value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+          message: "Invalid email format",
         },
       },
     },
@@ -41,10 +51,15 @@ const RegisterForm = () => {
       //   isRequired: true,
       label: "Password",
       placeholder: "Enter your password",
+
       validation: {
+        minLength: {
+          value: 6,
+          message: "Password must be at least 6 characters",
+        },
         required: {
           value: true,
-          message: "This is field is required!",
+          message: "postSpaceOfficerThis is field is required",
         },
       },
     },
@@ -55,13 +70,33 @@ const RegisterForm = () => {
       label: "Confirm Password",
       placeholder: "Enter your password",
       validation: {
-        required: {
-          value: true,
-          message: "This is field is required!",
+        required: "This field is required",
+        validate: (confirmPassword: string) => {
+          const { password } = form.getValues();
+
+          if (confirmPassword !== password) {
+            return "Confirm password does not match";
+          }
+
+          return true;
         },
       },
     },
   ];
+
+  const handleRegister = async (body: RegisterType) => {
+    try {
+      await postRegister(body);
+      addToast({ title: "Register Success ", color: "primary" });
+      router.push("/login");
+    } catch (error: any) {
+      addToast({
+        title: " Register Failed",
+        color: "danger",
+        description: error?.response?.data?.message as string,
+      });
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-6 min-h-[100vh]">
@@ -82,24 +117,26 @@ const RegisterForm = () => {
         </div>
         <FormGenerator
           form={form}
-          id="formLogin"
+          id="formRegister"
           data={dataForm}
+          disabled={!!loading}
           className=" w-full md:w-3/4"
-          onSubmit={() => {}}
+          onSubmit={handleRegister}
         />
         <div className="w-full md:w-3/4">
           <Button
             className="w-full"
             type="submit"
-            form="formLogin"
+            form="formRegister"
             color="primary"
+            isLoading={!!loading}
           >
-            Login
+            Submit
           </Button>
           <p className="text-sm">
-            Don't have an account?{" "}
-            <a href="" className="text-primary">
-              Register
+            Already have an account?{" "}
+            <a href="/login" className="text-primary">
+              Login
             </a>
           </p>
         </div>

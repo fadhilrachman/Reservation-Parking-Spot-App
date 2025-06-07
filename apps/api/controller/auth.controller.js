@@ -13,7 +13,7 @@ const PostLogin = async (req, res) => {
     });
 
     if (!checkCredenttial)
-      return res.status(401).json({ message: "Login Failed" });
+      return res.status(401).json({ message: "Check Your Email/Password" });
 
     const checkPassword = await bcrypt.compare(
       password,
@@ -21,7 +21,7 @@ const PostLogin = async (req, res) => {
     );
 
     if (!checkPassword)
-      return res.status(403).json({ message: "Login Failed" });
+      return res.status(403).json({ message: "Check Your Email/Password" });
 
     const token = await jwt.sign(checkCredenttial, process.env.JWT_KEY, {
       expiresIn: "28d",

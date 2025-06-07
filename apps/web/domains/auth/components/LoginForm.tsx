@@ -4,11 +4,15 @@ import { Controller, useForm } from "react-hook-form";
 import FormGenerator, {
   DataFormType,
 } from "../../../shared/components/FormGenerator";
-import { Button } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
 import Link from "next/link";
+import { useAuthStore } from "../stores/auth.stores";
+import { LoginType } from "../type";
+import Cookies from "js-cookie";
 
 const LoginForm = () => {
-  const form = useForm();
+  const { loading, postLogin } = useAuthStore();
+  const form = useForm<LoginType>();
   const dataForm: DataFormType[] = [
     {
       name: "email",
@@ -19,7 +23,11 @@ const LoginForm = () => {
       validation: {
         required: {
           value: true,
-          message: "This is field is required!",
+          message: "postSpaceOfficerThis is field is required",
+        },
+        pattern: {
+          value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+          message: "Invalid email format",
         },
       },
     },
@@ -32,11 +40,28 @@ const LoginForm = () => {
       validation: {
         required: {
           value: true,
-          message: "This is field is required!",
+          message: "postSpaceOfficerThis is field is required",
         },
       },
     },
   ];
+
+  const handleLogin = async (body: LoginType) => {
+    try {
+      const result = await postLogin(body);
+      addToast({ title: "Login Success ", color: "primary" });
+      console.log({ result });
+
+      const token = result.data?.result?.token as string;
+      await Cookies.set(process.env.COOKIE_NAME as string, token);
+    } catch (error: any) {
+      addToast({
+        title: " Login Failed",
+        color: "danger",
+        description: error?.response?.data?.message as string,
+      });
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-6 min-h-[100vh]">
@@ -62,7 +87,8 @@ const LoginForm = () => {
           id="formLogin"
           data={dataForm}
           className=" w-full md:w-3/4"
-          onSubmit={() => {}}
+          onSubmit={handleLogin}
+          disabled={!!loading}
         />
         <div className="w-full md:w-3/4 space-y-2">
           <Button
@@ -70,8 +96,9 @@ const LoginForm = () => {
             type="submit"
             form="formLogin"
             color="primary"
+            isLoading={!!loading}
           >
-            Login
+            Submit
           </Button>
           <p className="text-sm">
             Don't have an account?{" "}

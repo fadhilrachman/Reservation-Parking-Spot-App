@@ -9,6 +9,26 @@ interface SpaceCustomerType {
   id: string;
   name: string;
   created_at: Date;
+  transaction: TransactionCustomerType[];
+}
+interface ReservationType {
+  time_start: Date;
+  time_end: Date;
+  space_id: string;
+  price: number;
 }
 
-export type { FLoorCustomerType, SpaceCustomerType };
+interface TransactionCustomerType {
+  id: string;
+  status: string;
+  time_start: Date;
+  price: number;
+  time_end: Date;
+}
+
+export type {
+  FLoorCustomerType,
+  TransactionCustomerType,
+  SpaceCustomerType,
+  ReservationType,
+};

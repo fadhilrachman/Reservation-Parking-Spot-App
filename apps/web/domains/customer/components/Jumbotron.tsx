@@ -9,20 +9,41 @@ import {
 } from "@heroui/react";
 import { Search } from "lucide-react";
 import React, { useState } from "react";
-
+import { useFloorCustomerStores } from "../stores/floor.customer";
+import moment from "moment";
+import { parseDate } from "@internationalized/date";
 interface Filter {
-  date: DateValue | null;
+  date: DateValue | any;
   start_time: string | (readonly string[] & string) | undefined;
   end_time: string | (readonly string[] & string) | undefined;
 }
 const Jumbotron = () => {
+  const { setFilter: setFilterStore, getFloorCustomer } =
+    useFloorCustomerStores();
   const [filter, setFilter] = useState<Filter>({
-    date: null,
+    date: parseDate(moment().format("YYYY-MM-DD")),
     start_time: "06:00",
     end_time: "12:00",
   });
+  const handleSearch = () => {
+    setFilterStore({
+      date: filter.date,
+      start_time: filter.start_time as string,
+      end_time: filter.end_time as string,
+    });
+    const { year, month, day } = filter.date;
 
-  console.log({ filter });
+    const startTime = moment(
+      `${year}-${month}-${day} ${filter.start_time}`,
+      "YYYY-M-D HH:mm"
+    ).toDate();
+
+    const endTime = moment(
+      `${year}-${month}-${day} ${filter.end_time}`,
+      "YYYY-M-D HH:mm"
+    ).toDate();
+    getFloorCustomer({ start_time: startTime, end_time: endTime });
+  };
 
   return (
     <div className="relative flex items-center justify-center h-[360px] text-white">
@@ -78,7 +99,12 @@ const Jumbotron = () => {
               }}
             />
           </div>
-          <Button startContent={<Search size={18} />} color="primary">
+          <Button
+            type="button"
+            onPress={handleSearch}
+            startContent={<Search size={18} />}
+            color="primary"
+          >
             Search
           </Button>
         </CardBody>

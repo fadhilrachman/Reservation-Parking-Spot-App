@@ -21,6 +21,8 @@ model User {
   created_at DateTime @default(now())
   update_at DateTime @updatedAt 
   is_officer Boolean
+  transaction Transaction[]
+
 }
 
 model Floor {
@@ -52,11 +54,13 @@ model Transaction {
   update_at DateTime @updatedAt 
   space Space? @relation(fields: [space_id], references: [id])
   space_id String?
+  price Int
+  user User? @relation(fields: [user_id], references: [id])
+  user_id String?
 }
 
 enum Status {
   paid
   unpaid
   canceled
-  rejected
 }

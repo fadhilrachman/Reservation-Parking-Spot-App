@@ -3,6 +3,8 @@ const { createPagination } = require("../lib/helper");
 const prisma = new PrismaClient();
 
 const GetFloorCustomer = async (req, res, next) => {
+  const { start_time, end_time } = req.query;
+
   try {
     const result = await prisma.floor.findMany({
       where: {
@@ -12,6 +14,28 @@ const GetFloorCustomer = async (req, res, next) => {
         space: {
           orderBy: {
             created_at: "asc",
+          },
+          include: {
+            transaction: {
+              where: {
+                user_id: req.user.id,
+                status: {
+                  not: "canceled",
+                },
+                AND: [
+                  {
+                    time_start: {
+                      lt: end_time,
+                    },
+                  },
+                  {
+                    time_end: {
+                      gt: start_time,
+                    },
+                  },
+                ],
+              },
+            },
           },
           where: {
             deleted_at: null,

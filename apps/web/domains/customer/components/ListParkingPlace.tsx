@@ -5,24 +5,24 @@ import ConfirmReservation from "./ConfirmReservation";
 import { Building } from "lucide-react";
 import { useFloorCustomerStores } from "../stores/floor.customer";
 import FloorSkeleton from "./FloorSkeleton";
+import moment from "moment";
+import { FLoorCustomerType } from "../types";
 
 const ListParkingPlace = () => {
-  const { getFloorCustomer, data, loadingList } = useFloorCustomerStores();
+  const { getFloorCustomer, data, loadingList, selectedData, setSelectedData } =
+    useFloorCustomerStores();
   const [dialog, setDialog] = useState({
     reservation: false,
   });
-  const handleReservation = () => {
+  const handleReservation = (item: FLoorCustomerType) => {
     setDialog((p) => ({ ...p, reservation: true }));
-    // addToast({
-    //   title: "Spot Unavailable",
-
-    //   description:
-    //     "Looks like someone else already booked this spot. Try choosing a different one",
-    // });
   };
 
   useEffect(() => {
-    getFloorCustomer();
+    getFloorCustomer({
+      start_time: moment().set({ hour: 6, minute: 0, second: 0 }).toDate(),
+      end_time: moment().set({ hour: 12, minute: 0, second: 0 }).toDate(),
+    });
   }, []);
 
   return (
@@ -41,17 +41,29 @@ const ListParkingPlace = () => {
                 </div>{" "}
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6">
                   {item.space.map((val, key2) => {
+                    const isHaveReservationUnpaid = val.transaction.some(
+                      (sm) => sm.status == "unpaid"
+                    );
+                    const isHaveReservationPaid = val.transaction.some(
+                      (sm) => sm.status == "paid"
+                    );
                     return (
                       <Card
                         key={key2}
                         onPress={() => {
-                          //   if (val == 5) {
-                          handleReservation();
-                          //   }
+                          setSelectedData({
+                            floor_name: item.name,
+                            space_id: val.id,
+                            space_name: val.name,
+                            is_reservation_unpaid: isHaveReservationUnpaid,
+                            is_reservation_done: isHaveReservationPaid,
+                            transaction_id: val.transaction[0]?.id,
+                          });
+                          handleReservation(item);
                         }}
                         isHoverable={key2 != 5}
                         isPressable
-                        className={`h-[60px] ${key2 == 5 && "bg-neutral-200"}`}
+                        className={`h-[60px] ${isHaveReservationUnpaid && "bg-yellow-100 hover:!bg-yellow-100"}  ${key2 == 5 && "bg-neutral-200"}`}
                       >
                         <CardBody className="flex items-center justify-center h-full w-full">
                           {key2 == 5 ? (
