@@ -17,7 +17,7 @@ export const AcmeLogo = () => {
 
 const NavbarCustomer = () => {
   return (
-    <div className="flex px-12 py-4  justify-between items-center">
+    <div className="flex border-b px-12 py-4  justify-between items-center">
       <div className="flex items-center">
         <AcmeLogo />
 

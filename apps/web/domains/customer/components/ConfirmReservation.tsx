@@ -18,7 +18,9 @@ const ConfirmReservation = ({ isOpen, onOpenChange }: Props) => {
     <Modal isOpen={isOpen} size="lg" onOpenChange={onOpenChange}>
       <ModalContent>
         <>
-          <ModalHeader className="flex flex-col gap-1">Reservation</ModalHeader>
+          <ModalHeader className="flex flex-col gap-1">
+            Reservation Summary
+          </ModalHeader>
           <ModalBody className="px-7 ">
             <div className="space-y-2">
               <div className="flex items-start space-x-2">
@@ -56,7 +58,7 @@ const ConfirmReservation = ({ isOpen, onOpenChange }: Props) => {
               Close
             </Button>
             <Button color="primary" onPress={onOpenChange}>
-              Submit
+              Pay By Cash
             </Button>
           </ModalFooter>
         </>

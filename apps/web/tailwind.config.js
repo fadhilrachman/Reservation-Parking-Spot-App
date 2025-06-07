@@ -17,13 +17,13 @@ export default {
         light: {
           colors: {
             primary: {
-              DEFAULT: "#BEF264",
-              foreground: "#000000",
+              DEFAULT: "#01565E",
+              100: "#E1F5F2",
             },
             secondary: {
-              DEFAULT: "#F8FE69",
+              DEFAULT: "#086169",
             },
-            focus: "#BEF264",
+            focus: "#01565E",
           },
         },
       },
