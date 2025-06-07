@@ -3,20 +3,20 @@ const { createPagination } = require("../lib/helper");
 const prisma = new PrismaClient();
 
 const GetFloorCustomer = async (req, res, next) => {
-  const { page = 1, per_page = 10, program_id } = req.query;
-  const skip = (page - 1) * per_page;
   try {
-    const count = await prisma.floor.count({
-      where: {
-        deleted_at: null,
-      },
-    });
     const result = await prisma.floor.findMany({
       where: {
         deleted_at: null,
       },
       include: {
-        space: true,
+        space: {
+          orderBy: {
+            created_at: "asc",
+          },
+          where: {
+            deleted_at: null,
+          },
+        },
       },
     });
     return res.status(200).json({ data: result });
@@ -26,18 +26,8 @@ const GetFloorCustomer = async (req, res, next) => {
 };
 
 const GetFloorOfficer = async (req, res, next) => {
-  const { page = 1, per_page = 10, program_id } = req.query;
-  const skip = (page - 1) * per_page;
   try {
-    const count = await prisma.floor.count({
-      where: {
-        deleted_at: null,
-      },
-    });
-    // const pagination = createPagination({ page, per_page, total_data: count });
     const result = await prisma.floor.findMany({
-      // skip,
-      // take: Number(per_page),
       where: {
         deleted_at: null,
       },
@@ -46,9 +36,11 @@ const GetFloorOfficer = async (req, res, next) => {
           orderBy: {
             created_at: "asc",
           },
+          where: {
+            deleted_at: null,
+          },
         },
       },
-      // distinct:'created_at'
       orderBy: {
         created_at: "asc",
       },
@@ -87,7 +79,6 @@ const PutFloorOfficer = async (req, res, next) => {
 };
 
 const DeleteFloorController = async (req, res, next) => {
-  const { name } = req.body;
   const floorId = req.params.floor_id;
   try {
     const result = await prisma.floor.update({

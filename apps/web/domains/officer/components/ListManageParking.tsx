@@ -9,18 +9,8 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Tab,
-  Tabs,
 } from "@heroui/react";
-import {
-  Building,
-  Car,
-  Delete,
-  Edit,
-  EllipsisVertical,
-  Plus,
-  Trash,
-} from "lucide-react";
+import { Building, Edit, EllipsisVertical, Plus, Trash } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import FloorForm from "./FloorForm";
 import { useFloorOfficerStores } from "../stores/floor.officer";
@@ -30,11 +20,18 @@ import { useSpaceOfficerStores } from "../stores/space.officer";
 import ModalDelete from "../../../shared/components/ModalDelete";
 
 const ListManageParking = () => {
-  const { data, getFloorOfficer, loadingList, setSelectedData } =
-    useFloorOfficerStores();
+  const {
+    data,
+    getFloorOfficer,
+    loadingList,
+    setSelectedData,
+    selectedData,
+    deleteFloorOfficer,
+    loadingWrite,
+  } = useFloorOfficerStores();
   const {
     setSelectedData: setSelectedDataSpace,
-    loadingWrite,
+    loadingWrite: loadingWriteSpace,
     deleteSpaceOfficer,
     selectedData: selectedDataSpace,
   } = useSpaceOfficerStores();
@@ -48,14 +45,24 @@ const ListManageParking = () => {
     deleteFloor: false,
   });
 
+  const handleDeleteFloor = async () => {
+    try {
+      await deleteFloorOfficer(selectedData?.id as string);
+      addToast({ title: "Success Delete Floor", color: "primary" });
+      getFloorOfficer();
+      setDialog((p) => ({ ...p, deleteFloor: false }));
+    } catch (error) {
+      addToast({ title: "Error Delete Floor", color: "danger" });
+    }
+  };
   const handleDeleteSpace = async () => {
     try {
-      deleteSpaceOfficer(selectedDataSpace?.id as string);
-      addToast({ title: "Success Create Space", color: "primary" });
+      await deleteSpaceOfficer(selectedDataSpace?.id as string);
+      addToast({ title: "Success Delete Space", color: "primary" });
       getFloorOfficer();
-      setDialog((p) => ({ ...p, deleteSpace: true }));
+      setDialog((p) => ({ ...p, deleteSpace: false }));
     } catch (error) {
-      addToast({ title: "Error Create Space", color: "danger" });
+      addToast({ title: "Error Delete Space", color: "danger" });
     }
   };
 
@@ -96,6 +103,10 @@ const ListManageParking = () => {
                       color="danger"
                       isIconOnly
                       className=" h-6 "
+                      onPress={() => {
+                        setSelectedData(item);
+                        setDialog((p) => ({ ...p, deleteFloor: true }));
+                      }}
                     >
                       {" "}
                       <Trash size={16} className="" />
@@ -154,14 +165,14 @@ const ListManageParking = () => {
                                       className="text-danger"
                                       color="danger"
                                       onPress={() => {
-                                        setSelectedData(item);
+                                        setSelectedDataSpace(val);
                                         setDialog((p) => ({
                                           ...p,
-                                          editSpace: true,
+                                          deleteSpace: true,
                                         }));
                                       }}
                                     >
-                                      Delete file
+                                      Delete
                                     </DropdownItem>
                                   </DropdownMenu>
                                 </Dropdown>
@@ -234,9 +245,19 @@ const ListManageParking = () => {
       />
       <ModalDelete
         isOpen={dialog.deleteSpace}
+        isLoading={!!loadingWriteSpace}
         onOpenChange={() => {
           setDialog((p) => ({ ...p, deleteSpace: false }));
         }}
+        onDelete={handleDeleteSpace}
+      />
+      <ModalDelete
+        isOpen={dialog.deleteFloor}
+        isLoading={!!loadingWrite}
+        onOpenChange={() => {
+          setDialog((p) => ({ ...p, deleteFloor: false }));
+        }}
+        onDelete={handleDeleteFloor}
       />
     </div>
   );

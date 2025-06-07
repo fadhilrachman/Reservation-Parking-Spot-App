@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export const AcmeLogo = () => {
@@ -16,6 +17,7 @@ export const AcmeLogo = () => {
 };
 
 const NavbarCustomer = () => {
+  const router = useRouter();
   return (
     <div className="flex border-b px-12 py-4  justify-between items-center">
       <div className="flex items-center">
@@ -24,9 +26,22 @@ const NavbarCustomer = () => {
         <span>Acme</span>
       </div>
       <div className="flex space-x-3">
-        <Button color="primary">Sign In</Button>
-        <Button variant="bordered" color="primary">
-          Sign Up
+        <Button
+          color="primary"
+          onPress={() => {
+            router.push("/login");
+          }}
+        >
+          Login
+        </Button>
+        <Button
+          onPress={() => {
+            router.push("/register");
+          }}
+          variant="bordered"
+          color="primary"
+        >
+          Register
         </Button>
       </div>
     </div>

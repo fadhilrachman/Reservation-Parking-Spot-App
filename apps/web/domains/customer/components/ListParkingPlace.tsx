@@ -1,18 +1,13 @@
 "use client";
-import {
-  addToast,
-  Badge,
-  Card,
-  CardBody,
-  Chip,
-  Tab,
-  Tabs,
-} from "@heroui/react";
-import React, { useState } from "react";
+import { Card, CardBody } from "@heroui/react";
+import React, { useState, useEffect } from "react";
 import ConfirmReservation from "./ConfirmReservation";
 import { Building } from "lucide-react";
+import { useFloorCustomerStores } from "../stores/floor.customer";
+import FloorSkeleton from "./FloorSkeleton";
 
 const ListParkingPlace = () => {
+  const { getFloorCustomer, data, loadingList } = useFloorCustomerStores();
   const [dialog, setDialog] = useState({
     reservation: false,
   });
@@ -25,72 +20,54 @@ const ListParkingPlace = () => {
     //     "Looks like someone else already booked this spot. Try choosing a different one",
     // });
   };
+
+  useEffect(() => {
+    getFloorCustomer();
+  }, []);
+
   return (
-    <div className="mt-[120px] px-[200px] ">
+    <div className="mt-[120px] px-6 md:px-[60px]  lg:px-[160px] ">
       <h3 className="text-xl font-semibold mb-5">Available Parking Spots</h3>
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <div className="text-primary border-b  w-full flex items-center space-x-2">
-            <Building size={18} />
-            <h3 className=" text-xl">Floor 1</h3>
-          </div>{" "}
-          <div className="grid grid-cols-8 gap-6">
-            {[1, 2, 2, 5, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4].map((val, key) => {
-              return (
-                <Card
-                  key={key}
-                  onPress={() => {
-                    //   if (val == 5) {
-                    handleReservation();
-                    //   }
-                  }}
-                  isHoverable={val != 5}
-                  isPressable
-                  className={`h-[60px] ${val == 5 && "bg-neutral-200"}`}
-                >
-                  <CardBody className="flex items-center justify-center h-full w-full">
-                    {val == 5 ? (
-                      <img src="/img/car.png" className="h-[30px]" />
-                    ) : (
-                      "A1"
-                    )}
-                  </CardBody>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div className="text-primary border-b  w-full flex items-center space-x-2">
-            <Building size={18} />
-            <h3 className=" text-xl">Floor 1</h3>
-          </div>{" "}
-          <div className="grid grid-cols-8 gap-6">
-            {[1, 2, 2, 5, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4].map((val, key) => {
-              return (
-                <Card
-                  key={key}
-                  onPress={() => {
-                    //   if (val == 5) {
-                    handleReservation();
-                    //   }
-                  }}
-                  isHoverable={val != 5}
-                  isPressable
-                  className={`h-[60px] ${val == 5 && "bg-neutral-200"}`}
-                >
-                  <CardBody className="flex items-center justify-center h-full w-full">
-                    {val == 5 ? (
-                      <img src="/img/car.png" className="h-[30px]" />
-                    ) : (
-                      "A1"
-                    )}
-                  </CardBody>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
+      <div className="space-y-7">
+        {loadingList ? (
+          <FloorSkeleton />
+        ) : (
+          data.map((item, key) => {
+            return (
+              <div className="space-y-4" key={key}>
+                <div className="text-primary border-b  w-full flex items-center space-x-2">
+                  <Building size={18} />
+                  <h3 className=" text-xl">{item.name}</h3>
+                </div>{" "}
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6">
+                  {item.space.map((val, key2) => {
+                    return (
+                      <Card
+                        key={key2}
+                        onPress={() => {
+                          //   if (val == 5) {
+                          handleReservation();
+                          //   }
+                        }}
+                        isHoverable={key2 != 5}
+                        isPressable
+                        className={`h-[60px] ${key2 == 5 && "bg-neutral-200"}`}
+                      >
+                        <CardBody className="flex items-center justify-center h-full w-full">
+                          {key2 == 5 ? (
+                            <img src="/img/car.png" className="h-[30px]" />
+                          ) : (
+                            "A1"
+                          )}
+                        </CardBody>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
 
       <ConfirmReservation

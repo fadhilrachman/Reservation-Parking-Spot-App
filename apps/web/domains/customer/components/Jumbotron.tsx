@@ -4,28 +4,26 @@ import {
   CardBody,
   CardHeader,
   DatePicker,
+  DateValue,
   Input,
-  Select,
-  SelectItem,
 } from "@heroui/react";
 import { Search } from "lucide-react";
-import React from "react";
-export const animals = [
-  { key: "cat", label: "Cat" },
-  { key: "dog", label: "Dog" },
-  { key: "elephant", label: "Elephant" },
-  { key: "lion", label: "Lion" },
-  { key: "tiger", label: "Tiger" },
-  { key: "giraffe", label: "Giraffe" },
-  { key: "dolphin", label: "Dolphin" },
-  { key: "penguin", label: "Penguin" },
-  { key: "zebra", label: "Zebra" },
-  { key: "shark", label: "Shark" },
-  { key: "whale", label: "Whale" },
-  { key: "otter", label: "Otter" },
-  { key: "crocodile", label: "Crocodile" },
-];
+import React, { useState } from "react";
+
+interface Filter {
+  date: DateValue | null;
+  start_time: string | (readonly string[] & string) | undefined;
+  end_time: string | (readonly string[] & string) | undefined;
+}
 const Jumbotron = () => {
+  const [filter, setFilter] = useState<Filter>({
+    date: null,
+    start_time: "06:00",
+    end_time: "12:00",
+  });
+
+  console.log({ filter });
+
   return (
     <div className="relative flex items-center justify-center h-[360px] text-white">
       <div
@@ -44,24 +42,41 @@ const Jumbotron = () => {
           and arrive with confidence.
         </h3>
       </div>
-      <Card className="absolute -bottom-20">
+      <Card className="absolute max-w-[600px] w-full -bottom-20">
         {/* <CardHeader className="bg-primary">
           Choose when you need a parking spot
           <h3>Choose Date and Time</h3>
         </CardHeader> */}
-        <CardBody className="w-[480px] space-y-6">
-          <div className="flex space-x-3">
-            <DatePicker label="Date" labelPlacement="outside" />
-            <Select
-              className=""
-              label="Time"
-              placeholder="Select your time"
+        <CardBody className=" space-y-6">
+          <div className="flex space-x-3 items-end">
+            <DatePicker
+              label="Date"
               labelPlacement="outside"
-            >
-              {animals.map((animal) => (
-                <SelectItem key={animal.key}>{animal.label}</SelectItem>
-              ))}
-            </Select>
+              value={filter.date}
+              onChange={(e) => {
+                setFilter((p) => ({ ...p, date: e }));
+              }}
+            />
+            <Input
+              type="time"
+              value={filter.start_time}
+              labelPlacement="outside"
+              label="Start Time"
+              onChange={(e) => {
+                setFilter((p) => ({ ...p, start_time: e.target.value }));
+              }}
+            />
+            {/* <span className="text-xs text-neutral-500 mb-3.5">until</span> */}
+            <Input
+              type="time"
+              className="w-full"
+              value={filter.end_time}
+              labelPlacement="outside"
+              label="End Time"
+              onChange={(e) => {
+                setFilter((p) => ({ ...p, end_time: e.target.value }));
+              }}
+            />
           </div>
           <Button startContent={<Search size={18} />} color="primary">
             Search
