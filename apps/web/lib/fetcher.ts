@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 const myCookie = Cookies.get(process.env.COOKIE_NAME as string);
 
 const fetcher = axios.create({
-  baseURL: "/api",
+  baseURL: process.env.API_URL,
 });
 
 if (myCookie) {

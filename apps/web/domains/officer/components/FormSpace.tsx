@@ -12,31 +12,29 @@ import FormGenerator, {
   DataFormType,
 } from "../../../shared/components/FormGenerator";
 import { useForm } from "react-hook-form";
-import { CreateFLoorOfficerType } from "../type";
+import { useSpaceOfficerStores } from "../stores/space.officer";
 import { useFloorOfficerStores } from "../stores/floor.officer";
+import { CreateSpaceOfficerType } from "../type";
 
 interface Props {
   isOpen: boolean;
   onOpenChange: () => void;
   mode: "create" | "edit";
 }
-const FloorForm = ({ isOpen, onOpenChange, mode }: Props) => {
-  const {
-    postFloorOfficer,
-    loadingWrite,
-    getFloorOfficer,
-    selectedData,
-    putFloorOfficer,
-  } = useFloorOfficerStores();
+const FormSpace = ({ isOpen, onOpenChange, mode }: Props) => {
+  const { loadingWrite, postSpaceOfficer, selectedData, putSpaceOfficer } =
+    useSpaceOfficerStores();
+  const { getFloorOfficer, selectedData: selectedDataFloor } =
+    useFloorOfficerStores();
+  const form = useForm();
 
-  const form = useForm<CreateFLoorOfficerType>();
   const dataForm: DataFormType[] = [
     {
       name: "name",
       type: "text",
       //   isRequired: true,
-      label: "Floor Name",
-      placeholder: "Example: Floor 1 ",
+      label: "Space Name",
+      placeholder: "Example: A1 ",
       validation: {
         required: {
           value: true,
@@ -45,19 +43,24 @@ const FloorForm = ({ isOpen, onOpenChange, mode }: Props) => {
       },
     },
   ];
-  const handleSubmit = async (body: CreateFLoorOfficerType) => {
+
+  const handleSubmit = async (body: CreateSpaceOfficerType) => {
     try {
       if (mode == "create") {
-        await postFloorOfficer(body);
+        await postSpaceOfficer({
+          ...body,
+          floor_id: selectedDataFloor?.id as string,
+        });
       } else {
-        await putFloorOfficer(body, selectedData?.id as string);
+        await putSpaceOfficer(body, selectedData?.id as string);
       }
-      addToast({ title: "Success Create Floor", color: "primary" });
+
+      addToast({ title: "Success Create Space", color: "primary" });
       getFloorOfficer();
       form.reset({ name: "" });
       onOpenChange();
     } catch (error) {
-      addToast({ title: "Error Create Floor", color: "danger" });
+      addToast({ title: "Error Create Space", color: "danger" });
     }
   };
 
@@ -68,13 +71,12 @@ const FloorForm = ({ isOpen, onOpenChange, mode }: Props) => {
       });
     }
   }, [selectedData]);
-
   return (
     <Modal isOpen={isOpen} size="lg" onOpenChange={onOpenChange}>
       <ModalContent>
         <>
-          <ModalHeader className="flex capitalize flex-col gap-1">
-            {mode} Floor
+          <ModalHeader className="capitalize flex flex-col gap-1">
+            {mode} Space
           </ModalHeader>
           <ModalBody className="px-7 ">
             <FormGenerator
@@ -104,4 +106,4 @@ const FloorForm = ({ isOpen, onOpenChange, mode }: Props) => {
   );
 };
 
-export default FloorForm;
+export default FormSpace;

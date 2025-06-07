@@ -5,7 +5,7 @@ import React from "react";
 const Provider = ({ children }: { children: React.ReactNode }) => {
   return (
     <HeroUIProvider>
-      <ToastProvider />
+      <ToastProvider placement="top-right" />
       {children}
     </HeroUIProvider>
   );

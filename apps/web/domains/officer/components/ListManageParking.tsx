@@ -1,5 +1,6 @@
 "use client";
 import {
+  addToast,
   Button,
   Card,
   CardBody,
@@ -20,136 +21,174 @@ import {
   Plus,
   Trash,
 } from "lucide-react";
-import React, { useState } from "react";
-import AddSpace from "./AddSpace";
+import React, { useState, useEffect } from "react";
 import FloorForm from "./FloorForm";
+import { useFloorOfficerStores } from "../stores/floor.officer";
+import { EmptyDataState } from "../../../shared/components/EmptyData";
+import FormSpace from "./FormSpace";
+import { useSpaceOfficerStores } from "../stores/space.officer";
+import ModalDelete from "../../../shared/components/ModalDelete";
 
-const Menu = () => {
-  return (
-    <Dropdown>
-      <DropdownTrigger>
-        <Button size="sm" variant="light" isIconOnly className=" h-6 ">
-          {" "}
-          <EllipsisVertical size={16} className="text-neutral-500" />
-        </Button>
-      </DropdownTrigger>
-      <DropdownMenu
-        aria-label="Action event example"
-        onAction={(key) => alert(key)}
-      >
-        <DropdownItem key="edit">Edit</DropdownItem>
-        <DropdownItem key="delete" className="text-danger" color="danger">
-          Delete file
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
-  );
-};
-
-const MenuFloor = () => {
-  return (
-    <Dropdown>
-      <DropdownTrigger>
-        <Button size="sm" variant="light" isIconOnly className=" h-6 ">
-          {" "}
-          <EllipsisVertical size={16} className="text-neutral-500" />
-        </Button>
-      </DropdownTrigger>
-      <DropdownMenu
-        aria-label="Action event example"
-        onAction={(key) => alert(key)}
-      >
-        <DropdownItem key="edit">Edit</DropdownItem>
-        <DropdownItem key="delete" className="text-danger" color="danger">
-          Delete file
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
-  );
-};
 const ListManageParking = () => {
+  const { data, getFloorOfficer, loadingList, setSelectedData } =
+    useFloorOfficerStores();
+  const {
+    setSelectedData: setSelectedDataSpace,
+    loadingWrite,
+    deleteSpaceOfficer,
+    selectedData: selectedDataSpace,
+  } = useSpaceOfficerStores();
+
   const [dialog, setDialog] = useState({
-    add: false,
+    addSpace: false,
+    editSpace: false,
     addFloor: false,
-    editFalse: false,
+    editFloor: false,
+    deleteSpace: false,
+    deleteFloor: false,
   });
-  const handleReservation = () => {
-    // setDialog((p) => ({ ...p, reservation: true }));
-    // addToast({
-    //   title: "Spot Unavailable",
-    //   description:
-    //     "Looks like someone else already booked this spot. Try choosing a different one",
-    // });
+
+  const handleDeleteSpace = async () => {
+    try {
+      deleteSpaceOfficer(selectedDataSpace?.id as string);
+      addToast({ title: "Success Create Space", color: "primary" });
+      getFloorOfficer();
+      setDialog((p) => ({ ...p, deleteSpace: true }));
+    } catch (error) {
+      addToast({ title: "Error Create Space", color: "danger" });
+    }
   };
+
+  useEffect(() => {
+    getFloorOfficer();
+  }, []);
+
   return (
     <div className="">
       <h3 className="text-xl font-semibold mb-5">Manage Parking Spots</h3>
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <div className=" w-full border-b text-primary flex justify-between pb-1 items-center">
-              <div className="space-x-2  flex items-center">
-                <Building size={20} className="" />
-                <h3 className="text-xl">Floor 1</h3>
-              </div>
-              <div className="space-x-1">
-                <Button size="sm" variant="light" isIconOnly className=" h-6 ">
-                  {" "}
-                  <Edit size={16} className="text-neutral-500" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="light"
-                  color="danger"
-                  isIconOnly
-                  className=" h-6 "
-                >
-                  {" "}
-                  <Trash size={16} className="" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardBody className="pb-6">
-            <div className="space-y-4">
-              <div className="grid grid-cols-8 gap-6">
-                {[1, 2, 2, 5, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4].map(
-                  (val, key) => {
-                    return (
+      <div className="space-y-8">
+        {data.map((item, key) => {
+          return (
+            <Card key={key}>
+              <CardHeader>
+                <div className=" w-full border-b text-primary flex justify-between pb-1 items-center">
+                  <div className="space-x-2  flex items-center">
+                    <Building size={20} className="" />
+                    <h3 className="text-xl">{item.name}</h3>
+                  </div>
+                  <div className="space-x-1">
+                    <Button
+                      size="sm"
+                      variant="light"
+                      isIconOnly
+                      className=" h-6 "
+                      onPress={() => {
+                        setSelectedData(item);
+                        setDialog((p) => ({ ...p, editFloor: true }));
+                      }}
+                    >
+                      {" "}
+                      <Edit size={16} className="text-neutral-500" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="light"
+                      color="danger"
+                      isIconOnly
+                      className=" h-6 "
+                    >
+                      {" "}
+                      <Trash size={16} className="" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardBody className="pb-6">
+                <div className="space-y-4">
+                  {item.space.length == 0 ? (
+                    <EmptyDataState
+                      buttonText="Add New Space"
+                      onAddData={() => {
+                        setSelectedData(item);
+                        setDialog((p) => ({ ...p, addSpace: true }));
+                      }}
+                    />
+                  ) : (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6">
+                      {item.space.map((val, key2) => {
+                        return (
+                          <Card key={key2} className={`h-[60px] `}>
+                            <CardBody>
+                              <div className="flex items-center justify-around h-full w-full">
+                                <span>{val?.name}</span>
+                                <Dropdown>
+                                  <DropdownTrigger>
+                                    <Button
+                                      size="sm"
+                                      variant="light"
+                                      isIconOnly
+                                      className=" h-6 "
+                                    >
+                                      {" "}
+                                      <EllipsisVertical
+                                        size={16}
+                                        className="text-neutral-500"
+                                      />
+                                    </Button>
+                                  </DropdownTrigger>
+                                  <DropdownMenu aria-label="Action event example">
+                                    <DropdownItem
+                                      key="edit"
+                                      onPress={() => {
+                                        setSelectedDataSpace(val);
+                                        setDialog((p) => ({
+                                          ...p,
+                                          editSpace: true,
+                                        }));
+                                      }}
+                                    >
+                                      Edit
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      key="delete"
+                                      className="text-danger"
+                                      color="danger"
+                                      onPress={() => {
+                                        setSelectedData(item);
+                                        setDialog((p) => ({
+                                          ...p,
+                                          editSpace: true,
+                                        }));
+                                      }}
+                                    >
+                                      Delete file
+                                    </DropdownItem>
+                                  </DropdownMenu>
+                                </Dropdown>
+                              </div>
+                            </CardBody>
+                          </Card>
+                        );
+                      })}
                       <Card
-                        key={key}
                         onPress={() => {
-                          //   if (val == 5) {
-                          handleReservation();
-                          //   }
+                          setSelectedData(item);
+                          setDialog((p) => ({ ...p, addSpace: true }));
                         }}
-                        className={`h-[60px] `}
+                        isPressable
+                        className={`h-[60px] !border-dashed bg-primary-100 border-primary border shadow-none`}
                       >
-                        <CardBody>
-                          <div className="flex items-center justify-around h-full w-full">
-                            <span>A1</span>
-                            <Menu />
-                          </div>
+                        <CardBody className="flex text-xs text-center items-center justify-center h-full w-full">
+                          Add New Space
                         </CardBody>
                       </Card>
-                    );
-                  }
-                )}
-                <Card
-                  onPress={() => {
-                    setDialog((p) => ({ ...p, add: true }));
-                  }}
-                  isPressable
-                  className={`h-[60px] !border-dashed bg-primary-100 border-primary border shadow-none`}
-                >
-                  <CardBody className="flex text-xs text-center items-center justify-center h-full w-full">
-                    Add New Space
-                  </CardBody>
-                </Card>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
+                    </div>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+          );
+        })}
         <Button
           startContent={<Plus />}
           variant="flat"
@@ -161,16 +200,42 @@ const ListManageParking = () => {
           Add New Floor
         </Button>
       </div>
-      <AddSpace
-        isOpen={dialog.add}
+
+      {/*/////////////  */}
+      {/* DIALOG */}
+      {/*/////////////  */}
+      <FormSpace
+        mode="create"
+        isOpen={dialog.addSpace}
         onOpenChange={() => {
-          setDialog((p) => ({ ...p, add: false }));
+          setDialog((p) => ({ ...p, addSpace: false }));
+        }}
+      />
+      <FormSpace
+        mode="edit"
+        isOpen={dialog.editSpace}
+        onOpenChange={() => {
+          setDialog((p) => ({ ...p, editSpace: false }));
         }}
       />
       <FloorForm
+        mode="create"
         isOpen={dialog.addFloor}
         onOpenChange={() => {
           setDialog((p) => ({ ...p, addFloor: false }));
+        }}
+      />
+      <FloorForm
+        mode="edit"
+        isOpen={dialog.editFloor}
+        onOpenChange={() => {
+          setDialog((p) => ({ ...p, editFloor: false }));
+        }}
+      />
+      <ModalDelete
+        isOpen={dialog.deleteSpace}
+        onOpenChange={() => {
+          setDialog((p) => ({ ...p, deleteSpace: false }));
         }}
       />
     </div>

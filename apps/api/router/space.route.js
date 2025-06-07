@@ -10,8 +10,8 @@ const router = express();
 
 router.get("/officer/space", GetSpaceOfficer);
 router.post("/officer/space", PostSpaceOfficer);
-router.put("/officer/space/:floor_id", PutSpaceOfficer);
-router.delete("/officer/space/:floor_id", DeleteSpaceOfficer);
+router.put("/officer/space/:space_id", PutSpaceOfficer);
+router.delete("/officer/space/:space_id", DeleteSpaceOfficer);
 
 router.get("/customer/space", GetSpaceCustomer);
 

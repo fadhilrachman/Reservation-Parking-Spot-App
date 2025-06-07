@@ -11,15 +11,15 @@ const GetFloorCustomer = async (req, res, next) => {
         deleted_at: null,
       },
     });
-    const pagination = createPagination({ page, per_page, total_data: count });
     const result = await prisma.floor.findMany({
-      skip,
-      take: Number(per_page),
       where: {
         deleted_at: null,
       },
+      include: {
+        space: true,
+      },
     });
-    return res.status(200).json({ data: result, pagination });
+    return res.status(200).json({ data: result });
   } catch (error) {
     return res.status(500).json({ message: error || "Internal Server Error" });
   }
@@ -34,15 +34,26 @@ const GetFloorOfficer = async (req, res, next) => {
         deleted_at: null,
       },
     });
-    const pagination = createPagination({ page, per_page, total_data: count });
+    // const pagination = createPagination({ page, per_page, total_data: count });
     const result = await prisma.floor.findMany({
-      skip,
-      take: Number(per_page),
+      // skip,
+      // take: Number(per_page),
       where: {
         deleted_at: null,
       },
+      include: {
+        space: {
+          orderBy: {
+            created_at: "asc",
+          },
+        },
+      },
+      // distinct:'created_at'
+      orderBy: {
+        created_at: "asc",
+      },
     });
-    return res.status(200).json({ data: result, pagination });
+    return res.status(200).json({ data: result });
   } catch (error) {
     return res.status(500).json({ message: error || "Internal Server Error" });
   }
